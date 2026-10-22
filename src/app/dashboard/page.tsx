@@ -322,20 +322,18 @@ function DashboardPageOld() {
   const activeList = filterWills(baseList, search, statusFilter);
 
   const handleExportCSV = useCallback(() => {
-    let csv: string;
     try {
-      csv = exportWillsToCSV(activeList);
+      const csv = exportWillsToCSV(activeList);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sorowill-wills-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error(formatError(error));
-      return;
+      toast.error(`CSV export failed: ${formatError(error)}`);
     }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `sorowill-wills-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
   }, [activeList, toast]);
 
   const isFiltering = search.trim() !== '' || statusFilter !== 'all';
